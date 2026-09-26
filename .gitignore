@@ -1,0 +1,32 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+._*
+
+# Xcode
+xcuserdata/
+*.xcworkspace/
+
+# Derived data
+DerivedData/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+KnowledgeAgent/.venv/
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Brainstorm visual companion session files
+.superpowers/
+
+# Isolated feature worktrees
+.worktrees/

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture Outline Chart</title>
+<style>
+:root {
+  --bg: #0B0B14;
+  --bg-elevated: #12121F;
+  --card: #181827;
+  --card-hover: #1E1E32;
+  --border: #2A2A45;
+  --border-subtle: #1F1F35;
+  --text: #F1F5F9;
+  --text-secondary: #8B95A7;
+  --text-tertiary: #5A6480;
+  --cyan: #22D3EE;
+  --purple: #A78BFA;
+  --orange: #FBBF24;
+  --green: #4ADE80;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  padding: 40px;
+  min-height: 100vh;
+}
+.chart-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.chart-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #22D3EE 0%, #A78BFA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.chart-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(135deg, #22D3EE, #A78BFA);
+  border-radius: 9999px;
+}
+.outline-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.outline-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.3), transparent);
+}
+.outline-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+.outline-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chapter {
+  background: linear-gradient(90deg, rgba(34,211,238,0.08), transparent);
+  border: 1px solid rgba(34,211,238,0.15);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  position: relative;
+  transition: all var(--transition-base);
+}
+.chapter:hover {
+  border-color: rgba(34,211,238,0.3);
+  box-shadow: 0 0 20px rgba(34,211,238,0.05);
+}
+.chapter-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chapter-title::before {
+  content: '';
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(34,211,238,0.5);
+}
+.sections {
+  margin-top: 12px;
+  margin-left: 18px;
+  padding-left: 16px;
+  border-left: 2px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.section {
+  background: linear-gradient(90deg, rgba(167,139,250,0.06), transparent);
+  border: 1px solid rgba(167,139,250,0.12);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  transition: all var(--transition-base);
+}
+.section:hover {
+  border-color: rgba(167,139,250,0.25);
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--purple);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(167,139,250,0.4);
+}
+.points {
+  margin-top: 8px;
+  margin-left: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.point-tag {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 4px 10px;
+  transition: all var(--transition-base);
+}
+.point-tag:hover {
+  border-color: rgba(251,191,36,0.2);
+  color: var(--orange);
+}
+.expand-hint {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  margin-left: 14px;
+}
+</style>
+</head>
+<body>
+<div class="chart-container">
+  <div class="chart-title">章节大纲图</div>
+  <div class="outline-wrap">
+    <div class="outline-subtitle">讲座/课程的知识层级结构 — 核心概念与知识点脉络</div>
+    <div class="outline-tree">
+      <div class="chapter">
+        <div class="chapter-title">第一章：情绪的本质</div>
+        <div class="sections">
+          <div class="section">
+            <div class="section-title">1.1 情绪不是需要被消灭的敌人</div>
+            <div class="points">
+              <span class="point-tag">情绪的生理功能</span>
+              <span class="point-tag">情绪与身体信号</span>
+              <span class="point-tag">接纳而非对抗</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">1.2 情绪流动的自然法则</div>
+            <div class="points">
+              <span class="point-tag">情绪的周期性</span>
+              <span class="point-tag">允许存在的意义</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">第二章：职场中的情绪管理</div>
+        <div class="sections">
+          <div class="section">
+            <div class="section-title">2.1 压力来源的多维分析</div>
+            <div class="points">
+              <span class="point-tag">组织压力</span>
+              <span class="point-tag">人际关系压力</span>
+              <span class="point-tag">自我期待压力</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">2.2 从"治愈"到"共处"的转变</div>
+            <div class="points">
+              <span class="point-tag">治愈心态的误区</span>
+              <span class="point-tag">共处的实践方法</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">第三章：人际关系与情绪边界</div>
+        <div class="sections">
+          <div class="section">
+            <div class="section-title">3.1 情绪感染的机制</div>
+            <div class="points">
+              <span class="point-tag">镜像神经元</span>
+              <span class="point-tag">情绪传染的边界</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">3.2 建立健康的情绪边界</div>
+            <div class="points">
+              <span class="point-tag">说"不"的能力</span>
+              <span class="point-tag">自我优先原则</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

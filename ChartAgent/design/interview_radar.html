@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Radar Chart</title>
+<style>
+:root {
+  --bg: #0B0B14;
+  --bg-elevated: #12121F;
+  --card: #181827;
+  --card-hover: #1E1E32;
+  --border: #2A2A45;
+  --border-subtle: #1F1F35;
+  --text: #F1F5F9;
+  --text-secondary: #8B95A7;
+  --text-tertiary: #5A6480;
+  --cyan: #22D3EE;
+  --purple: #A78BFA;
+  --orange: #FBBF24;
+  --green: #4ADE80;
+  --red: #FB7185;
+  --blue: #60A5FA;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  padding: 40px;
+  min-height: 100vh;
+}
+.chart-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.chart-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #22D3EE 0%, #A78BFA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.chart-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(135deg, #22D3EE, #A78BFA);
+  border-radius: 9999px;
+}
+.radar-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.radar-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.3), transparent);
+}
+.radar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+.radar-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.radar-legend {
+  display: flex;
+  gap: 20px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 2px solid;
+}
+.legend-dot.solid { background: rgba(34,211,238,0.25); border-color: var(--cyan); }
+.legend-dot.dashed { background: rgba(167,139,250,0.25); border-color: var(--purple); }
+.radar-svg-wrap {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.radar-svg {
+  width: 480px;
+  height: 480px;
+}
+.radar-grid-circle {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.radar-axis {
+  stroke: var(--border-subtle);
+  stroke-width: 1;
+}
+.radar-axis-label {
+  fill: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.radar-polygon {
+  fill-opacity: 0.15;
+  stroke-width: 2.5;
+  transition: all var(--transition-base);
+}
+.radar-polygon:hover {
+  fill-opacity: 0.3;
+}
+.radar-point {
+  r: 5;
+  stroke-width: 2;
+  fill: var(--bg);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+.radar-point:hover {
+  r: 7;
+}
+.radar-tooltip {
+  position: absolute;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  z-index: 10;
+}
+.radar-dimensions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 32px;
+}
+.dim-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+  transition: all var(--transition-base);
+}
+.dim-card:hover {
+  border-color: rgba(34,211,238,0.2);
+}
+.dim-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.dim-values {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.dim-val-cyan { color: var(--cyan); }
+.dim-val-purple { color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="chart-container">
+  <div class="chart-title">观点雷达图</div>
+  <div class="radar-wrap">
+    <div class="radar-header">
+      <div class="radar-subtitle">受访者在各话题维度上的立场分布<br><span style="color:var(--text-tertiary);font-size:12px;">数值越高表示在该维度上立场越明确/深入</span></div>
+      <div class="radar-legend">
+        <div class="legend-item"><div class="legend-dot solid"></div>江多拉</div>
+        <div class="legend-item"><div class="legend-dot dashed"></div>张小萌</div>
+      </div>
+    </div>
+    <div class="radar-svg-wrap">
+      <svg class="radar-svg" viewBox="0 0 480 480">
+        <!-- Grid circles -->
+        <g transform="translate(240,240)">
+          <circle class="radar-grid-circle" r="40"/>
+          <circle class="radar-grid-circle" r="80"/>
+          <circle class="radar-grid-circle" r="120"/>
+          <circle class="radar-grid-circle" r="160"/>
+          <circle class="radar-grid-circle" r="200"/>
+          <!-- Axes -->
+          <line class="radar-axis" x1="0" y1="0" x2="0" y2="-200"/>
+          <line class="radar-axis" x1="0" y1="0" x2="141.4" y2="-141.4"/>
+          <line class="radar-axis" x1="0" y1="0" x2="200" y2="0"/>
+          <line class="radar-axis" x1="0" y1="0" x2="141.4" y2="141.4"/>
+          <line class="radar-axis" x1="0" y1="0" x2="0" y2="200"/>
+          <line class="radar-axis" x1="0" y1="0" x2="-141.4" y2="141.4"/>
+          <line class="radar-axis" x1="0" y1="0" x2="-200" y2="0"/>
+          <line class="radar-axis" x1="0" y1="0" x2="-141.4" y2="-141.4"/>
+          <!-- Axis labels -->
+          <text class="radar-axis-label" x="0" y="-224">情绪认知</text>
+          <text class="radar-axis-label" x="165" y="-165">职场压力</text>
+          <text class="radar-axis-label" x="224" y="0">人际关系</text>
+          <text class="radar-axis-label" x="165" y="165">自我成长</text>
+          <text class="radar-axis-label" x="0" y="224">生活态度</text>
+          <text class="radar-axis-label" x="-165" y="165">心理健康</text>
+          <text class="radar-axis-label" x="-224" y="0">价值观念</text>
+          <text class="radar-axis-label" x="-165" y="-165">社会观察</text>
+          <!-- Polygon 1 (cyan) -->
+          <polygon class="radar-polygon" fill="var(--cyan)" stroke="var(--cyan)"
+            points="0,-140 106,-106 160,0 113,113 0,100 -85,85 -120,0 -99,-99"/>
+          <!-- Polygon 2 (purple) -->
+          <polygon class="radar-polygon" fill="var(--purple)" stroke="var(--purple)"
+            points="0,-100 71,-71 100,0 57,57 0,140 -71,71 -160,0 -71,-71"/>
+          <!-- Points cyan -->
+          <circle class="radar-point" cx="0" cy="-140" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="106" cy="-106" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="160" cy="0" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="113" cy="113" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="0" cy="100" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="-85" cy="85" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="-120" cy="0" stroke="var(--cyan)"/>
+          <circle class="radar-point" cx="-99" cy="-99" stroke="var(--cyan)"/>
+          <!-- Points purple -->
+          <circle class="radar-point" cx="0" cy="-100" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="71" cy="-71" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="100" cy="0" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="57" cy="57" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="0" cy="140" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="-71" cy="71" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="-160" cy="0" stroke="var(--purple)"/>
+          <circle class="radar-point" cx="-71" cy="-71" stroke="var(--purple)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="radar-dimensions">
+      <div class="dim-card"><div class="dim-name">情绪认知</div><div class="dim-values"><span class="dim-val-cyan">7.0</span><span class="dim-val-purple">5.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">职场压力</div><div class="dim-values"><span class="dim-val-cyan">7.5</span><span class="dim-val-purple">5.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">人际关系</div><div class="dim-values"><span class="dim-val-cyan">8.0</span><span class="dim-val-purple">5.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">自我成长</div><div class="dim-values"><span class="dim-val-cyan">7.0</span><span class="dim-val-purple">4.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">生活态度</div><div class="dim-values"><span class="dim-val-cyan">5.0</span><span class="dim-val-purple">7.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">心理健康</div><div class="dim-values"><span class="dim-val-cyan">4.5</span><span class="dim-val-purple">6.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">价值观念</div><div class="dim-values"><span class="dim-val-cyan">6.0</span><span class="dim-val-purple">8.0</span></div></div>
+      <div class="dim-card"><div class="dim-name">社会观察</div><div class="dim-values"><span class="dim-val-cyan">6.5</span><span class="dim-val-purple">5.0</span></div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

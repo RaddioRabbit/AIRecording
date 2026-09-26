@@ -1,0 +1,51 @@
+{
+  "fixtureVersion": 1,
+  "query": "最终由谁负责上线协调？",
+  "unrelatedQueries": ["公司的年度营收是多少？", "谁负责市场预算？"],
+  "expectedAnswer": "最终由张伟负责上线协调，后续会议已确认。[S1][S2]",
+  "expectedAnswerAfterDeletion": "后续会议确认张伟继续负责上线协调。[S1]",
+  "recordings": [
+    {
+      "recordingId": "11111111-1111-4111-8111-111111111111",
+      "title": "产品发布协调会",
+      "recordedAt": "2026-08-10T09:00:00Z",
+      "summaryMarkdown": "张伟负责上线协调。",
+      "segments": [
+        {
+          "id": "11111111-aaaa-4111-8111-111111111111",
+          "sequence": 0,
+          "startTime": 42.0,
+          "endTime": 58.0,
+          "speakerId": "speaker-zhang",
+          "speakerName": "张伟",
+          "text": "本次发布由张伟负责上线协调，并在发布窗口跟进风险。"
+        }
+      ]
+    },
+    {
+      "recordingId": "22222222-2222-4222-8222-222222222222",
+      "title": "发布后跟进会",
+      "recordedAt": "2026-08-11T09:00:00Z",
+      "summaryMarkdown": "已确认由张伟继续负责上线协调。",
+      "segments": [
+        {
+          "id": "22222222-bbbb-4222-8222-222222222222",
+          "sequence": 0,
+          "startTime": 18.0,
+          "endTime": 30.0,
+          "speakerId": "speaker-li",
+          "speakerName": "李敏",
+          "text": "确认：张伟继续负责上线协调，团队按既定发布窗口执行。"
+        }
+      ]
+    }
+  ],
+  "sourceResponse": {
+    "sourceId": "S1",
+    "recordingId": "11111111-1111-4111-8111-111111111111",
+    "segmentIds": ["11111111-aaaa-4111-8111-111111111111"],
+    "startTime": 42.0,
+    "endTime": 58.0,
+    "speakerName": "张伟"
+  }
+}

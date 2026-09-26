@@ -98,20 +98,29 @@ cp "${KNOWLEDGE_AGENT_BINARY}" "${RESOURCES_DIR}/KnowledgeAgent/knowledge-agent"
 chmod +x "${RESOURCES_DIR}/KnowledgeAgent/knowledge-agent"
 
 echo "🩺 Verifying packaged KnowledgeAgent health..."
+# Expected service version comes from the Swift contract (single source of truth),
+# so bumping KnowledgeAgent SERVICE_VERSION doesn't silently break this check.
+EXPECTED_KA_VERSION="$(sed -n 's/.*expectedServiceVersion = "\([^"]*\)".*/\1/p' \
+    "${PROJECT_DIR}/AIRecording/Services/KnowledgeServiceManager.swift" | head -1)"
+if [ -z "${EXPECTED_KA_VERSION}" ]; then
+    echo "❌ Error: could not read expectedServiceVersion from KnowledgeServiceManager.swift"
+    exit 1
+fi
+echo "   expecting serviceVersion ${EXPECTED_KA_VERSION}"
 KNOWLEDGE_VERIFY_DIR="$(mktemp -d /private/tmp/knowledge-agent-verify.XXXXXX)"
 KNOWLEDGE_VERIFY_PORT="18766"
 KNOWLEDGE_DB_PATH="${KNOWLEDGE_VERIFY_DIR}/knowledge.sqlite" PORT="${KNOWLEDGE_VERIFY_PORT}" \
     "${RESOURCES_DIR}/KnowledgeAgent/knowledge-agent" >"${KNOWLEDGE_VERIFY_DIR}/runtime.log" 2>&1 &
 KNOWLEDGE_VERIFY_PID=$!
 KNOWLEDGE_HEALTHY=0
-for attempt in {1..30}; do
+for attempt in {1..150}; do
     if curl --silent --fail "http://127.0.0.1:${KNOWLEDGE_VERIFY_PORT}/health" >"${KNOWLEDGE_VERIFY_DIR}/health.json"; then
-        if grep -q '"serviceVersion":"1.0.0"' "${KNOWLEDGE_VERIFY_DIR}/health.json"; then
+        if grep -q "\"serviceVersion\":\"${EXPECTED_KA_VERSION}\"" "${KNOWLEDGE_VERIFY_DIR}/health.json"; then
             KNOWLEDGE_HEALTHY=1
         fi
         break
     fi
-    sleep 0.2
+    sleep 0.4
 done
 kill "${KNOWLEDGE_VERIFY_PID}" 2>/dev/null || true
 wait "${KNOWLEDGE_VERIFY_PID}" 2>/dev/null || true
